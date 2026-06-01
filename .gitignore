@@ -1,30 +1,30 @@
-# Sensitive/Company-specific content
-*.pdf
-reports/
+# Only include .opencode/ pipeline infrastructure
+# Everything else is excluded
 
-# Personal documents (not pipeline-related)
-coverletter-*
-resume-*
+# Exclude all by default
+*
 
-# Vector database (contains indexed code)
-.chroma/
-*.chroma/
+# Include .opencode/ contents
+!.opencode/
+!.opencode/**
 
-# Python environments
-.venv/
-venv/
-__pycache__/
-*.pyc
+# Include repo root files
+!.gitignore
+!README.md
 
-# OpenCode runtime state
+# Exclude runtime/generated within .opencode
 .opencode/sessions/
 .opencode/cache/
+.opencode/node_modules/
+.opencode/package-lock.json
+.opencode/mcp-servers/code-rag/venv/
+.opencode/mcp-servers/code-rag/.chroma/
+.opencode/mcp-servers/code-rag/indexer.log
 
 # OS files
 .DS_Store
-Thumbs.db
 
-# Credentials (should never be committed)
+# Credentials
 *.env
 .env.*
 credentials.json
