@@ -75,6 +75,7 @@ Load these using the `skill` tool when needed:
 |-------|-------------|---------|
 | `requirement-intake` | At pipeline start (vague input) | Structure the requirement |
 | `pattern-detector` | After requirement is structured | Select pipeline mode |
+| `context-compressor` | Between every stage transition | Compress reports → minimal agent payloads |
 | `pipeline-summary` | At each gate | Generate progress visualization |
 | `rollback` | On failure or user request | Revert changes safely |
 | `contract-validator` | At Gate 2 (after implementation) | Validate contract compliance |
@@ -163,6 +164,29 @@ When a user provides a vague or unstructured requirement:
 
 ### Phase 2: Pipeline Execution (Mode-Dependent)
 
+#### Context Compression (Applied at Every Stage Transition)
+
+**CRITICAL:** Before delegating to any sub-agent, apply the `context-compressor` skill to reduce the payload:
+
+```
+Stage N Report (full, 4-10K tokens)
+       │
+       ▼ [context-compressor rules]
+       │
+Compressed Contract (1-3K tokens)  ← Only this goes to Stage N+1
+       │
+       ▼
+Stage N+1 Agent (receives minimal, actionable context)
+```
+
+**Compression rules by transition:**
+- **Discovery → Implementation:** Extract Must Do + file paths + API contract + patterns. Drop all prose.
+- **Implementation → Test:** Extract files changed + behavior added + edge cases + test patterns. Drop decisions.
+- **Implementation → Verification:** Extract contract checklist + files + commands. Drop everything else.
+- **Test → Verification:** Extract test results + coverage gaps. Drop test code.
+
+Full reports are ALWAYS saved to `reports/` for humans. Compression only affects what agents receive.
+
 #### Full-Feature Mode (default)
 
 1. Send Teams notification: Pipeline started.
@@ -171,17 +195,17 @@ When a user provides a vague or unstructured requirement:
 4. Save the discovery report to `reports/01-discovery-report.md`.
 5. Send Teams notification: Discovery complete.
 6. **🛑 GATE 1:** Present summary with confidence score. Ask for approval.
-7. **DELEGATE** to Implementation Sub-Agent. Include the discovery report and context.
+7. **DELEGATE** to Implementation Sub-Agent. Include the **compressed** discovery contract (not full report).
 8. Save the implementation report to `reports/02-implementation-report.md`.
 9. Send Teams notification: Implementation complete.
 10. **🛑 GATE 2:** Present summary + diff + contract validation. Ask for approval.
     - Use `contract-validator` skill guidance to verify compliance.
-11. **DELEGATE** to Test Sub-Agent. Include the implementation report and context.
+11. **DELEGATE** to Test Sub-Agent. Include the **compressed** implementation context (files changed + behavior + edge cases).
     - Optionally use `test-scaffold` skill to pre-generate boilerplate.
 12. Save the test report to `reports/03-test-report.md`.
 13. Send Teams notification: Testing complete.
 14. **🛑 GATE 3:** Present test coverage and confidence. Ask for approval.
-15. **DELEGATE** to Verification Sub-Agent. Include all prior reports and context.
+15. **DELEGATE** to Verification Sub-Agent. Include the **compressed** state (contract checklist + diff + test results).
 16. Save the verification report to `reports/04-verification-report.md`.
 17. Send Teams notification: Verification complete.
 18. **🛑 GATE 4:** Present verification status and overall confidence. Ask for approval.
