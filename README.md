@@ -225,4 +225,6 @@ export TEAMS_WEBHOOK_URL="https://your-org.webhook.office.com/..."
 
 ## License
 
-Private — Internal use only.
+MIT License — Copyright (c) 2026 Kiran Kuppula
+
+See [LICENSE](LICENSE) for details.

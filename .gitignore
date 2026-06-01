@@ -11,6 +11,7 @@
 # Include repo root files
 !.gitignore
 !README.md
+!LICENSE
 
 # Exclude runtime/generated within .opencode
 .opencode/sessions/
