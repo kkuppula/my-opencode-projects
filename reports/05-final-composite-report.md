@@ -7,7 +7,7 @@
 | **Feature** | Add "Last Access" column to user roster page |
 | **Pipeline Mode** | full-feature (testing skipped by user) |
 | **Target Repo** | Ultra (Frontend) — Backend: no changes needed |
-| **Target Path** | `/Users/kiran.kuppula/work/GitHub/ultra` |
+| **Target Path** | `/path/to/ultra` |
 | **Stack** | TypeScript/Angular/Nx |
 | **Date** | 2026-05-31 |
 | **Original Scope** | Both (Learn + Ultra) — reduced to Frontend-only after discovery |

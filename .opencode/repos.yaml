@@ -1,7 +1,7 @@
 repos:
   backend:
     name: Learn
-    path: /Users/kiran.kuppula/work/GitHub/learn
+    path: /path/to/your/backend   # e.g., /Users/you/work/learn
     stack: Java/Gradle
     description: Learn LMS backend monolith
     patterns:
@@ -10,7 +10,7 @@ repos:
 
   frontend:
     name: Ultra
-    path: /Users/kiran.kuppula/work/GitHub/ultra
+    path: /path/to/your/frontend   # e.g., /Users/you/work/ultra
     stack: TypeScript/Angular/Nx
     description: Learn Ultra frontend monorepo
     patterns:

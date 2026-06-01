@@ -3,8 +3,8 @@
 ## Metadata
 - **Pipeline Mode**: full-feature
 - **Target Repositories**: 
-  - PRIMARY: Ultra (`/Users/kiran.kuppula/work/GitHub/ultra`)
-  - SECONDARY: Learn (`/Users/kiran.kuppula/work/GitHub/learn`)
+  - PRIMARY: Ultra (`/path/to/ultra`)
+  - SECONDARY: Learn (`/path/to/learn`)
 - **Timestamp**: 2026-06-01
 - **Confidence**: 85%
 
@@ -14,7 +14,7 @@
 
 | File | Change Type | Description |
 |------|-------------|-------------|
-| `/Users/kiran.kuppula/work/GitHub/ultra/apps/ultra-ui/app/features/course/roster/course-roster.html` | Modified | Added "Last Access" column header and data cell |
+| `/path/to/ultra/apps/ultra-ui/app/features/course/roster/course-roster.html` | Modified | Added "Last Access" column header and data cell |
 
 ### Detailed Changes
 

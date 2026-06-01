@@ -11,13 +11,13 @@
 
 repos:
   learn:
-    path: /Users/kiran.kuppula/work/GitHub/learn
+    path: /path/to/your/backend          # e.g., /Users/you/work/learn
     extensions: [".java", ".jsp", ".vm", ".properties", ".xml", ".gradle"]
     exclude_dirs: [".git", "build", "out", "node_modules", ".gradle"]
     description: Learn LMS backend monolith
 
   ultra:
-    path: /Users/kiran.kuppula/work/GitHub/ultra
+    path: /path/to/your/frontend         # e.g., /Users/you/work/ultra
     extensions: [".ts", ".tsx", ".html", ".scss", ".json"]
     exclude_dirs: [".git", "node_modules", "dist"]
     description: Ultra frontend app
