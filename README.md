@@ -57,9 +57,10 @@ User Input (vague or structured)
 │   ├── test-agent.md              #   Test creation
 │   ├── verification-agent.md      #   Final review & PR prep
 │   └── reviewer.md               #   Code review
-├── skills/                         # Reusable skill modules (10)
+├── skills/                         # Reusable skill modules (11)
 │   ├── requirement-intake/        #   Vague → structured requirements
 │   ├── pattern-detector/          #   Requirement classification
+│   ├── context-compressor/        #   Inter-agent token optimization
 │   ├── pipeline-summary/          #   Progress visualization
 │   ├── contract-validator/        #   Implementation compliance
 │   ├── pr-description/            #   PR text generation
@@ -126,6 +127,7 @@ Modes automatically **escalate** when complexity exceeds expectations.
 |-------|---------|
 | `requirement-intake` | Transform vague input → structured requirement |
 | `pattern-detector` | Classify requirement → select pipeline mode |
+| `context-compressor` | Compress reports → minimal inter-agent payloads (50-70% token savings) |
 | `pipeline-summary` | Generate progress visualization at gates |
 | `contract-validator` | Validate implementation matches discovery contract |
 | `pr-description` | Generate polished PR descriptions |
@@ -214,12 +216,96 @@ export TEAMS_WEBHOOK_URL="https://your-org.webhook.office.com/..."
 
 - **Intelligent mode selection** — auto-picks the right pipeline depth
 - **Multi-repo orchestration** — coordinates backend + frontend changes
+- **Context compression** — 50-70% token reduction between stages (see below)
 - **Confidence scoring** — every agent reports 0-100% with rationale
 - **Human-in-the-loop gates** — approval checkpoints between stages
 - **Institutional learning** — records patterns and pitfalls for future runs
 - **Contract validation** — ensures implementation matches discovery
 - **Safe rollback** — reverts changes cleanly on failure
 - **Teams notifications** — posts progress to Microsoft Teams
+
+---
+
+## Context Compression Layer
+
+A key optimization that sits **between pipeline stages** to reduce token waste by 50-70%.
+
+### The Problem
+
+Without compression, each agent receives the full output of all prior stages — most of which is irrelevant prose, rationale, and verbose code snippets. Tokens compound through the pipeline:
+
+```
+Without compression:                    With compression:
+Discovery Agent:    ~15K tokens         Discovery Agent:    ~6K tokens
+Implementation:     ~25K tokens         Implementation:     ~8K tokens
+Test Agent:         ~30K tokens         Test Agent:         ~6K tokens
+Verification:       ~35K tokens         Verification:       ~6K tokens
+────────────────────────────────        ──────────────────────────────
+Total:              ~100K+ tokens       Total:              ~26K tokens
+                                        Savings:            ~70%
+```
+
+### How It Works
+
+```
+Stage N Report (full, human-readable)
+       │
+       ├── Saved to reports/ (for human gates & debugging)
+       │
+       └── Compressed via rule-based extraction
+               │
+               ▼
+       Structured JSON Contract (1-3K tokens)
+               │
+               └── Passed to Stage N+1 Agent
+```
+
+### Compression Per Transition
+
+| Transition | What's Kept | What's Dropped | Savings |
+|-----------|-------------|---------------|---------|
+| Discovery → Implementation | Must Do list, file paths, API contract, patterns | Rationale, alternatives, journey narrative | ~60-75% |
+| Implementation → Test | Files changed, behavior added, edge cases | Decisions, contract validation, discovery | ~65-80% |
+| Implementation → Verification | Contract checklist, diff ref, commands | Full reports, prose, code-rag results | ~70-80% |
+| Test → Verification | Test results, coverage gaps | Test code, mock setup, framework config | ~75% |
+
+### Example: Discovery → Implementation
+
+```
+❌ Without compression (8K tokens):
+   "The discovery agent investigated the codebase using code-rag semantic
+   search. We queried 'user roster course membership' which returned 5 
+   results from the Learn repository. After analyzing MembershipTOPubV1.java
+   we found that the lastAccessed field has been available since version
+   3300.9.0 and is stored in the course_users.last_access_date column..."
+
+✅ With compression (2K tokens):
+   {
+     "must_do": [
+       {"action": "Add column header", "file": "course-roster.html", "lines": "289-307"}
+     ],
+     "api_contract": {"field": "lastAccessDate", "type": "Date|null"},
+     "files_to_modify": ["course-roster.html"],
+     "patterns": [{"ref": "course-grades-student.html:209", "note": "bb-date usage"}],
+     "guard_rails": ["hide-for-small", "No API changes", "No model changes"]
+   }
+```
+
+### Token Budgets Per Agent
+
+| Agent | Max Context | Breakdown |
+|-------|-------------|-----------|
+| Discovery | 6K tokens | Requirement (1K) + Instructions (3K) + Repo context (2K) |
+| Implementation | 8K tokens | Compressed contract (2K) + Instructions (3K) + Code refs (3K) |
+| Test | 6K tokens | Compressed impl (1.5K) + Instructions (3K) + Patterns (1.5K) |
+| Verification | 6K tokens | Compressed state (2K) + Instructions (3K) + Diff (1K) |
+
+### Design Principles
+
+- **No LLM call needed** — compression is rule-based extraction, not summarization
+- **Full reports always preserved** — humans see everything at gates; only agents get compressed versions
+- **Fallback expansion** — if an agent reports confidence < 60%, the orchestrator expands the missing section
+- **Never drop actionable items** — Must Do, file paths, and API contracts always pass through
 
 ---
 
