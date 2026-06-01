@@ -1,0 +1,42 @@
+# Code RAG MCP Server
+# Repos to index and search configuration
+#
+# Configure your own repos below. Example:
+#   repos:
+#     my-backend:
+#       path: /path/to/your/backend-repo
+#       extensions: [".java", ".py", ".go"]
+#       exclude_dirs: [".git", "build", "node_modules"]
+#       description: Backend services
+
+repos:
+  learn:
+    path: /Users/kiran.kuppula/work/GitHub/learn
+    extensions: [".java", ".jsp", ".vm", ".properties", ".xml", ".gradle"]
+    exclude_dirs: [".git", "build", "out", "node_modules", ".gradle"]
+    description: Learn LMS backend monolith
+
+  ultra:
+    path: /Users/kiran.kuppula/work/GitHub/ultra
+    extensions: [".ts", ".tsx", ".html", ".scss", ".json"]
+    exclude_dirs: [".git", "node_modules", "dist"]
+    description: Ultra frontend app
+
+indexing:
+  chunk_size: 60          # lines per chunk
+  chunk_overlap: 20       # overlapping lines between chunks
+  max_file_size: 50000    # skip files larger than this (bytes)
+  embedding_model: default  # "default" = ChromaDB built-in (all-MiniLM-L6-v2), or "openai", or "ollama"
+
+  # Only used if embedding_model is "openai"
+  openai:
+    model: text-embedding-3-small
+
+  # Only used if embedding_model is "ollama"
+  ollama:
+    model: nomic-embed-text
+    base_url: http://localhost:11434
+
+search:
+  default_top_k: 5
+  max_top_k: 20

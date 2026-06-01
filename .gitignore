@@ -1,0 +1,31 @@
+# Sensitive/Company-specific content
+*.pdf
+
+# Personal documents (not pipeline-related)
+coverletter-*
+resume-*
+
+# Vector database (contains indexed code)
+.chroma/
+*.chroma/
+
+# Python environments
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# OpenCode runtime state
+.opencode/sessions/
+.opencode/cache/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Credentials (should never be committed)
+*.env
+.env.*
+credentials.json
+*token*
+*secret*

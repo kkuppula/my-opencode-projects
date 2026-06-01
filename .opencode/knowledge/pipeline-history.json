@@ -1,0 +1,139 @@
+{
+  "pipelines": [
+    {
+      "pipeline_id": "banner-rename-20260531",
+      "timestamp": "2026-05-31T00:00:00Z",
+      "feature_name": "Rename 'Class is Complete' banner to 'Course is Complete' / 'Organization Course is Complete'",
+      "requirement_type": "cosmetic",
+      "pipeline_mode": "full-feature",
+      "target_repos": ["backend"],
+      "complexity_score": 3,
+      "outcome": "success_rolled_back",
+      "outcome_reason": "User requested rollback after successful implementation (changes stashed for future use)",
+      "timing": {
+        "discovery_seconds": 30,
+        "implementation_seconds": 25,
+        "testing_seconds": 0,
+        "verification_seconds": 0,
+        "total_seconds": 55,
+        "gate_wait_seconds": 10,
+        "stages_skipped": ["testing", "verification"]
+      },
+      "metrics": {
+        "files_changed": 2,
+        "lines_added": 2,
+        "lines_removed": 2,
+        "tests_added": 0,
+        "confidence_scores": {
+          "discovery": 95,
+          "implementation": 100,
+          "testing": null,
+          "verification": null
+        }
+      },
+      "patterns_used": [
+        "Locale-layered resource bundles (en_US_k12 overrides en_US)",
+        "BreadcrumbBarRenderer conditional course/org text selection",
+        "Properties file key: banner.course.complete / banner.organization.complete"
+      ],
+      "issues_found": [],
+      "lessons": [
+        "Learn uses locale-layered resource bundles — en_US_k12 overrides en_US defaults. When renaming 'Class' to 'Course', only K12 locale needed changes because others already used 'Course'.",
+        "BreadcrumbBarRenderer.java already handles course vs org distinction via course.isCourse()/course.isOrganization() — NO Java code changes needed for conditional banner text.",
+        "For cosmetic text changes in Learn Original: check properties files in workspace/base/base-locale/<locale>/messages/ — not Java code.",
+        "Quick-fix mode would have been sufficient for this change in hindsight (2 files, text-only, zero logic change). Consider downgrading full-feature to quick-fix when discovery reveals trivial scope.",
+        "The 'Organization Course is Complete' phrasing is unusual — always flag wording concerns to product team before implementing."
+      ],
+      "files_touched": [
+        "workspace/base/base-locale/en_US_k12/messages/course.properties",
+        "workspace/base/base-locale/en_US_k12/messages/organization.properties"
+      ],
+      "key_discovery": "The architecture cleanly separates display text (properties) from rendering logic (Java). Banner conditional logic is in BreadcrumbBarRenderer.java (L509-528)."
+    },
+    {
+      "pipeline_id": "roster-last-access-20260531",
+      "timestamp": "2026-05-31T00:00:00Z",
+      "feature_name": "Add 'Last Access' column to course roster page",
+      "requirement_type": "feature",
+      "pipeline_mode": "full-feature",
+      "target_repos": ["frontend"],
+      "initially_scoped_repos": ["backend", "frontend"],
+      "complexity_score": 7,
+      "actual_complexity": 3,
+      "outcome": "success_with_hotfixes",
+      "outcome_reason": "Core pipeline succeeded but 2 bugs found during live testing required post-pipeline fixes",
+      "timing": {
+        "discovery_seconds": 45,
+        "implementation_seconds": 35,
+        "testing_seconds": 0,
+        "verification_seconds": 30,
+        "hotfix_seconds": 60,
+        "total_seconds": 170,
+        "gate_wait_seconds": 30,
+        "stages_skipped": ["testing"]
+      },
+      "metrics": {
+        "files_changed": 3,
+        "lines_added": 15,
+        "lines_removed": 5,
+        "tests_added": 0,
+        "confidence_scores": {
+          "discovery": 90,
+          "implementation": 95,
+          "testing": null,
+          "verification": 95
+        }
+      },
+      "patterns_used": [
+        "Foundation 12-column grid layout for roster list view",
+        "AngularJS date filter for date formatting",
+        "ng-if conditional rendering for null handling",
+        "bb-translate directive for i18n",
+        "hide-for-small responsive class"
+      ],
+      "issues_found": [
+        {
+          "stage": "post-deploy",
+          "severity": "high",
+          "description": "Template bound to wrong property path: membership.lastAccessDate (empty) instead of membership.user.lastLoginDate (populated)",
+          "fix_applied": true,
+          "root_cause": "Discovery identified both lastAccessDate (top-level) and user.lastLoginDate (nested). Implementation used wrong path. The nested user object field was the one actually populated."
+        },
+        {
+          "stage": "post-deploy",
+          "severity": "high",
+          "description": "bb-date directive rendered literal text instead of formatted date — directive module not registered in roster component",
+          "fix_applied": true,
+          "root_cause": "AngularJS requires directive modules to be explicitly declared in component module dependencies. The bb-date directive (ultra.directives.bbDate) was not in course-roster.ts module array.",
+          "final_fix": "Replaced bb-date directive with built-in AngularJS date filter ({{ expr | date:'short' }}) which requires no module imports"
+        }
+      ],
+      "lessons": [
+        "CRITICAL: In Ultra's AngularJS architecture, custom directives (bb-date, bb-datetime) only work if their module is imported in the component's module definition. Always verify directive availability before using one.",
+        "SAFER APPROACH: Use AngularJS built-in filters ({{ expr | date:'short' }}) instead of custom directives for simple date formatting. They always work without module imports.",
+        "API response field paths: When the API returns nested objects (e.g., user.lastLoginDate inside membership), verify the EXACT property path in the Angular model. The frontend model may flatten or nest differently than expected.",
+        "Discovery identified 'lastAccessDate' (course-level) vs 'user.lastLoginDate' (system-level) distinction, but the wrong one was used in implementation. When two similar fields exist, always verify which one is actually populated by checking the Network tab.",
+        "Parallel discovery saved significant time by revealing zero backend work was needed — what was scoped as 7/10 cross-repo complexity became a 3/10 frontend-only change.",
+        "The roster module (course-roster.ts) has a limited set of directive dependencies. Any new directive usage requires adding to the module array.",
+        "User.lastLoginDate comes from the embedded user object in the memberships API response. The frontend model exposes it as membership.user.lastLoginDate (not membership.lastLoginDate)."
+      ],
+      "files_touched": [
+        "apps/ultra-ui/app/features/course/roster/course-roster.html",
+        "apps/ultra-ui/app/features/course/roster/course-roster.ts",
+        "apps/ultra-ui/app/locales/en/features/course/roster/course-roster.yaml"
+      ],
+      "key_discovery": "The membership API already returns lastLoginDate in the embedded user object. The frontend model already deserializes it. Zero backend changes and zero new API fields needed — purely a UI column addition.",
+      "clarifications_needed": [
+        "System login vs course access: Product clarification resolved that lastLoginDate (system login) was acceptable",
+        "Date format: User requested date + time (short format), not date-only"
+      ]
+    }
+  ],
+  "total_runs": 2,
+  "success_count": 2,
+  "failure_count": 0,
+  "rollback_count": 1,
+  "hotfix_count": 1,
+  "average_duration_seconds": 112,
+  "last_updated": "2026-05-31T00:00:00Z"
+}

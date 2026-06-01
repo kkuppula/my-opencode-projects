@@ -1,0 +1,28 @@
+{
+  "total_pipelines": 0,
+  "by_mode": {
+    "full-feature": { "count": 0, "success": 0, "avg_seconds": 0 },
+    "quick-fix": { "count": 0, "success": 0, "avg_seconds": 0 },
+    "hotfix": { "count": 0, "success": 0, "avg_seconds": 0 },
+    "refactor": { "count": 0, "success": 0, "avg_seconds": 0 }
+  },
+  "by_repo": {
+    "backend": { "count": 0, "success": 0 },
+    "frontend": { "count": 0, "success": 0 }
+  },
+  "avg_stage_durations": {
+    "discovery_seconds": 0,
+    "implementation_seconds": 0,
+    "testing_seconds": 0,
+    "verification_seconds": 0
+  },
+  "issues_caught": {
+    "by_stage": {
+      "discovery": 0,
+      "implementation": 0,
+      "testing": 0,
+      "verification": 0
+    }
+  },
+  "last_updated": "2026-05-31T00:00:00Z"
+}

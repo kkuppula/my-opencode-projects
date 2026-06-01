@@ -1,0 +1,117 @@
+# =============================================================================
+# AI Services - Production Profile Configuration
+# =============================================================================
+# This profile is activated when deploying to production environments.
+# Most values should come from environment variables or secrets management.
+
+spring:
+  # Production database - values from environment
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/ai_services}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:30}
+      minimum-idle: ${DB_POOL_MIN_IDLE:10}
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+
+  # JPA - strict validation in production
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Schema managed by Flyway only
+    show-sql: false
+    properties:
+      hibernate:
+        generate_statistics: false
+
+  # Flyway - strict validation
+  flyway:
+    enabled: true
+    baseline-on-migrate: false  # Don't auto-baseline in prod
+    validate-on-migrate: true
+    clean-disabled: true  # NEVER allow clean in production
+
+  # Security - production JWT settings
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWT_JWKS_URI:https://auth.blackboard.com/.well-known/jwks.json}
+          issuer-uri: ${JWT_ISSUER_URI:https://auth.blackboard.com}
+
+# =============================================================================
+# AI Integrations - Production Service
+# =============================================================================
+ai:
+  integrations:
+    base-url: ${AI_INTEGRATIONS_BASE_URL:https://ai-integrations.blackboard.com}
+    connect-timeout-ms: 5000
+    read-timeout-ms: 120000  # Longer timeout for AI operations
+    write-timeout-ms: 60000
+    max-connections: 200
+    max-pending-acquires: 2000
+    logging-enabled: false  # Disable request logging in prod
+
+# =============================================================================
+# AWS - Production Settings
+# =============================================================================
+aws:
+  secrets:
+    region: ${AWS_REGION:us-east-1}
+    secret-prefix: ai-services/prod/
+    use-local-secrets: false
+
+# =============================================================================
+# Actuator - Restricted in production
+# =============================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+      group:
+        readiness:
+          include: db,diskSpace
+        liveness:
+          include: ping
+
+# =============================================================================
+# Logging - Minimal in production
+# =============================================================================
+logging:
+  level:
+    root: WARN
+    com.blackboard.ai: INFO
+    org.springframework.security: WARN
+    org.hibernate: WARN
+  # Use JSON logging for production (for log aggregation)
+  pattern:
+    console: '{"timestamp":"%d{ISO8601}","level":"%level","logger":"%logger","message":"%msg","thread":"%thread"}%n'
+
+# =============================================================================
+# Swagger - Disabled in production by default
+# =============================================================================
+springdoc:
+  api-docs:
+    enabled: ${OPENAPI_ENABLED:false}
+  swagger-ui:
+    enabled: ${SWAGGER_UI_ENABLED:false}
+
+# =============================================================================
+# Server - Production optimizations
+# =============================================================================
+server:
+  tomcat:
+    max-threads: 200
+    accept-count: 100
+    max-connections: 8192
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/plain,application/javascript
+    min-response-size: 1024

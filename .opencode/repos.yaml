@@ -1,0 +1,18 @@
+repos:
+  backend:
+    name: Learn
+    path: /Users/kiran.kuppula/work/GitHub/learn
+    stack: Java/Gradle
+    description: Learn LMS backend monolith
+    patterns:
+      - "API", "service", "controller", "repository", "entity", "DTO"
+      - "database", "migration", "endpoint", "REST"
+
+  frontend:
+    name: Ultra
+    path: /Users/kiran.kuppula/work/GitHub/ultra
+    stack: TypeScript/Angular/Nx
+    description: Learn Ultra frontend monorepo
+    patterns:
+      - "UI", "component", "page", "view", "styling", "CSS"
+      - "Angular", "template", "module", "routing", "state"
