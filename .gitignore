@@ -1,5 +1,6 @@
 # Sensitive/Company-specific content
 *.pdf
+reports/
 
 # Personal documents (not pipeline-related)
 coverletter-*
